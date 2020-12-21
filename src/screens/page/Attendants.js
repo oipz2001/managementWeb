@@ -1,21 +1,33 @@
-import React from 'react';
-import { useState } from 'react';
-import Calendar from '../components/Calendar'
-import ReactDOM from 'react-dom';
-import { VictoryBar, VictoryChart, VictoryAxis,
-        VictoryTheme } from 'victory';
-
+import React from "react";
+import { useState } from "react";
+import * as HiIcons from "react-icons/hi";
+import { VictoryBar, VictoryChart, VictoryAxis, VictoryPie } from "victory";
+import axios from "axios";
 
 function Attandents() {
   const [value, onChange] = useState(new Date());
+  const [isShowModal, setShowModal] = useState(false);
+  const [studentNameModal, setStudentNameModal] = useState("");
+  const [studentIDModal, setStudentIDModal] = useState("");
+  const subject = [
+    {
+      id: "261457",
+      name: "Digital & image",
+      time: "18 Tue 18:00-19:30",
+      room: "512",
+      present: "16",
+      absent: "4",
+    },
+  ];
   const data = [
-    {quarter: 1, earnings: 13000},
-    {quarter: 2, earnings: 16500},
-    {quarter: 3, earnings: 14250},
-    {quarter: 4, earnings: 14250},
-    {quarter: 5, earnings: 14250},
-    {quarter: 6, earnings: 14250},
-    {quarter: 7, earnings: 19000}
+    { dmy: "01/01/20", present: 20, absent: 0 },
+    { dmy: "02/01/20", present: 15, absent: 5 },
+    { dmy: "03/01/20", present: 18, absent: 2 },
+    { dmy: "04/01/20", present: 16, absent: 4 },
+    { dmy: "05/01/20", present: 20, absent: 0 },
+    { dmy: "06/01/20", present: 15, absent: 5 },
+    { dmy: "07/01/20", present: 18, absent: 2 },
+    { dmy: "08/01/20", present: 16, absent: 4 },
   ];
   const head = ["Student ID", "Name", "Faculty", "Status"];
   const tbd = [
@@ -33,47 +45,182 @@ function Attandents() {
     },
   ];
 
+  const fetchAPI = async () => {
+    console.log("testAPI");
+    // fetch(
+    //   "http://localhost:5000/studentchecking/us-central1/checkapp/webApp/getData"
+    // )
+    //   .then((res) => res.json())
+    //   .then(
+    //     (result) => {
+    //       console.log(result);
+    //     },
+    //     (error) => {
+    //       console.log(error);
+    //     }
+    //   );
+
+
+    fetch('http://localhost:5000/studentchecking/us-central1/checkapp/webApp/postData', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: 'Pawaris',
+        id: '600610751'
+      })
+    })
+    .then((res) => res.json())
+    .then(
+        (result) => {
+          console.log(result);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
+  };
+
+  const student = [
+    { time: "14/08/2563", stutus: "checked" },
+    { time: "13/08/2563", stutus: "checked" },
+    { time: "12/08/2563", stutus: "checked" },
+    { time: "11/08/2563", stutus: "Uncheck" },
+  ];
+
   return (
-    <div className='container-fluid pt-4'>
-      <div className='box'>
-        <h3 className='head_text'>Attendance & stat</h3>
-      <div className='row mt-5'>
-        <div className='col'>
-          
-        </div>
-        <div className='col' >
-          <div className='att_css'>
-          <VictoryChart
-            theme={VictoryTheme.material}
-            domainPadding={data.length+20}
-          >
-          <VictoryAxis
-            tickValues={[1, 2, 3, 4, 5, 6, 7]}
-            tickFormat={["1", "2", "3", "4", "5", "6", "7"]}
-          />
-          <VictoryAxis
-            dependentAxis
-            tickFormat={(x) => (`${x / 1000}`)}
-          />
-          <VictoryBar
-            data={data}
-            x="quarter"
-            y="earnings"
-          />
-          </VictoryChart>
+    <div className="container-fluid pt-4">
+      <button
+        type="button"
+        className="btn btn-secondary"
+        data-dismiss="modal"
+        onClick={fetchAPI}
+      >
+        TestAPI
+      </button>
+      <div className="box">
+        <h3 className="head_text">Attendance & stat</h3>
+        <div className="row mt-5">
+          <div className="col-5">
+            <div className="box_subject">
+              {subject.map((h, idx) => (
+                <tr key={idx}>
+                  <td>
+                    <tr>
+                      <th className="p-1">{h.name}</th>
+                      <th className="p-1">{h.id}</th>
+                    </tr>
+                    <tr>{h.time}</tr>
+                    <tr>
+                      room: {h.room}
+                      <th className="pl-5">
+                        {h.present}
+                        <HiIcons.HiUser style={{ color: "green" }} />
+                        {h.absent}
+                        <HiIcons.HiUser style={{ color: "red" }} />
+                      </th>
+                    </tr>
+                  </td>
+                </tr>
+              ))}
+            </div>
+            <div className="att_pei">
+              <VictoryPie
+                data={[
+                  { x: "present", y: 16 },
+                  { x: "absent", y: 4 },
+                ]}
+                width={300}
+                colorScale={["green", "red"]}
+              />
+            </div>
+          </div>
+          <div className="col">
+            <div className="att_css">
+              <VictoryChart domainPadding={{ x: 20 }}>
+                <VictoryBar
+                  data={data}
+                  x="dmy"
+                  y={(d) => d.present - d.absent}
+                  style={{ data: { fill: "#9E76B4" } }}
+                />
+                <VictoryAxis
+                  label="Past 8 day"
+                  style={{
+                    axisLabel: { padding: 30 },
+                    tickLabels: { fontSize: 8, padding: 5 },
+                  }}
+                />
+                <VictoryAxis
+                  dependentAxis
+                  label="Present of Student"
+                  style={{
+                    axisLabel: { padding: 40 },
+                  }}
+                />
+              </VictoryChart>
+            </div>
           </div>
         </div>
-        </div>
-        <div className='row mt-5'>
-          <h3 className='head_text'>Students list</h3>
-        <div className="col mt-3">
-          <table className="table table-striped">
-            <thead>
-              {head.map((h, idx) => (
-                <th key={idx}>{h}</th>
-              ))}
-            </thead>
-            <tbody>
+        <div className="row mt-5">
+          <div className="row">
+            <div className="col">
+              <h3 className="head_text">Students list</h3>
+            </div>
+          </div>
+          <div className="col mt-3 box">
+            <table className="table table-secondary table-striped">
+              <thead>
+                {head.map((h, idx) => (
+                  <th key={idx}>{h}</th>
+                ))}
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Student ID"
+                      aria-label="Student ID"
+                    ></input>
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Name"
+                      aria-label="Name"
+                    ></input>
+                  </td>
+                  <td className="col-2">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Faculty"
+                      aria-label="Faculty"
+                    ></input>
+                  </td>
+                  <td className="col-1">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Status"
+                      aria-label="Status"
+                    ></input>
+                  </td>
+                  <div>
+                    <button
+                      type="button"
+                      className="btn btn-success mx-1"
+                      href="#"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </tr>
                 {tbd.map((t, idx) => (
                   <tr key={idx}>
                     <td>{t.id}</td>
@@ -95,12 +242,72 @@ function Attandents() {
                       >
                         Remove
                       </button>
+                      <button
+                        className="btn btn-warning mx-1"
+                        data-toggle="modal"
+                        data-target="#exampleModal"
+                        onClick={(e) => {
+                          setStudentNameModal(t.name);
+                          setStudentIDModal(t.id);
+                        }}
+                      >
+                        statistic
+                      </button>
                     </div>
                   </tr>
                 ))}
               </tbody>
-          </table>
+            </table>
+          </div>
         </div>
+      </div>
+      <div className="modal fade" id="exampleModal">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title head_text" id="exampleModalLabel">
+                {studentNameModal} {studentIDModal}
+              </h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <div className="att_pei">
+                <VictoryPie
+                  data={[
+                    { x: "present", y: 3 },
+                    { x: "absent", y: 1 },
+                  ]}
+                  width={300}
+                  colorScale={["green", "red"]}
+                  labels={({ datum }) => `${datum.x}: ${datum.y}`}
+                />
+              </div>
+              <tbody>
+                <h3 className="head_text pt-3">Checking list</h3>
+                {student.map((std, idx) => (
+                  <tr key={idx}>
+                    <tr>
+                      {std.stutus} {std.time}
+                    </tr>
+                  </tr>
+                ))}
+              </tbody>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

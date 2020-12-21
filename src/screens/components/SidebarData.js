@@ -8,25 +8,25 @@ export const SidebarData = [
   {
     title: 'Home',
     path: '/',
-    icon: <AiIcons.AiFillHome />,
+    icon: <AiIcons.AiFillHome style={{ color: '#9F76B4'}}/>,
     cName: 'nav-text'
   },
   {
     title: 'Reports',
     path: '/reports',
-    icon: <IoIcons.IoIosPaper />,
+    icon: <IoIcons.IoIosPaper style={{ color: '#9F76B4'}}/>,
     cName: 'nav-text'
   },
   {
     title: 'Seatmap',
     path: '/seatmap',
-    icon: <MdIcons.MdEventSeat />,
+    icon: <MdIcons.MdEventSeat style={{ color: '#9F76B4'}}/>,
     cName: 'nav-text'
   },
   {
     title: 'Attendants',
     path: '/attendants',
-    icon: <BsIcons.BsFillPersonCheckFill />,
+    icon: <BsIcons.BsFillPersonCheckFill style={{ color: '#9F76B4'}}/>,
     cName: 'nav-text'
   },
 ];

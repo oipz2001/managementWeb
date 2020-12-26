@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import * as HiIcons from "react-icons/hi";
-import { VictoryBar, VictoryChart, VictoryAxis, VictoryPie } from "victory";
+import { VictoryBar, VictoryChart, VictoryAxis, VictoryPie, VictoryStack, VictoryPortal, VictoryLabel } from "victory";
 import axios from "axios";
 
 function Attandents() {
@@ -20,15 +20,17 @@ function Attandents() {
     },
   ];
   const data = [
-    { dmy: "01/01/20", present: 20, absent: 0 },
-    { dmy: "02/01/20", present: 15, absent: 5 },
-    { dmy: "03/01/20", present: 18, absent: 2 },
-    { dmy: "04/01/20", present: 16, absent: 4 },
-    { dmy: "05/01/20", present: 20, absent: 0 },
-    { dmy: "06/01/20", present: 15, absent: 5 },
-    { dmy: "07/01/20", present: 18, absent: 2 },
-    { dmy: "08/01/20", present: 16, absent: 4 },
+    { dmy: "01/08/20", present: 20, absent: 0 },
+    { dmy: "02/08/20", present: 15, absent: 5 },
+    { dmy: "03/08/20", present: 18, absent: 2 },
+    { dmy: "04/08/20", present: 16, absent: 4 },
+    { dmy: "05/08/20", present: 20, absent: 0 },
+    { dmy: "06/08/20", present: 15, absent: 5 },
+    { dmy: "07/08/20", present: 18, absent: 2 },
+    { dmy: "08/08/20", present: 16, absent: 4 },
   ];
+
+  const test11 = ["first", "second", "third"]
   const head = ["Student ID", "Name", "Faculty", "Status"];
   const tbd = [
     {
@@ -92,14 +94,6 @@ function Attandents() {
 
   return (
     <div className="container-fluid pt-4">
-      <button
-        type="button"
-        className="btn btn-secondary"
-        data-dismiss="modal"
-        onClick={fetchAPI}
-      >
-        TestAPI
-      </button>
       <div className="box">
         <h3 className="head_text">Attendance & stat</h3>
         <div className="row mt-5">
@@ -140,12 +134,34 @@ function Attandents() {
           <div className="col">
             <div className="att_css">
               <VictoryChart domainPadding={{ x: 20 }}>
+                <VictoryStack
+                  colorScale={["green", "red"]}
+                  style={{
+                    data: { width: 20 },
+                    labels: { padding: -20 }
+                  }}
+                  labelComponent={
+                    <VictoryPortal>
+                      <VictoryLabel/>
+                    </VictoryPortal>
+                  }
+                >
                 <VictoryBar
                   data={data}
                   x="dmy"
-                  y={(d) => d.present - d.absent}
-                  style={{ data: { fill: "#9E76B4" } }}
+                  y="present"
+                  labels={({ datum }) => (datum.present ? datum.present: '')}
+                  style={{ labels: { fill: "white" } }}
                 />
+                <VictoryBar
+                  data={data}
+                  x="dmy"
+                  y="absent"
+                  labels={({ datum }) => (datum.absent ? datum.absent: '')}
+                  style={{ labels: { fill: "white" } }}
+                />
+               
+                </VictoryStack>
                 <VictoryAxis
                   label="Past 8 day"
                   style={{

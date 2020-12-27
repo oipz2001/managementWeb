@@ -1,9 +1,8 @@
 import React from "react";
-import { useState, useEffect, useFocusEffect } from "react";
+import { useState, useEffect} from "react";
 import * as FcIcons from "react-icons/fc";
 import "react-datepicker/dist/react-datepicker.css";
 import "../components/App.css";
-import Calendar from "../components/Calendar";
 import ExcelReader from "../components/ExcelReader";
 import DatePicker from "react-datepicker";
 
@@ -30,6 +29,8 @@ function Home(props) {
   const [editClassSemester, setEditClassSemester] = useState(null);
   const [editClassUqId, setEditClassUqId] = useState(null);
 
+  const [removeClass, setRemoveClass] = useState({uqID:null,date:null});
+
   const [teacherIDState, setTeacherIDState] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const ExampleCustomInput = ({ value, onClick }) => (
@@ -41,7 +42,7 @@ function Home(props) {
   const head = [
     "Session ID",
     "Name",
-    "Date & time",
+    "Time",
     "Room",
     "Semester",
     "Status",
@@ -53,6 +54,16 @@ function Home(props) {
     skipEmptyLines: true,
     transformHeader: (header) => header.toLowerCase().replace(/\W/g, "_"),
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setcurrentDate(moment(new Date()).format("YYYY-MM-DD").toString())
+      setcurrentTime(moment(new Date()).format("HH:mm").toString())
+      fetchClassAPI()
+      console.log('This will run every second!');
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [sessionsData]);
 
   useEffect(() => {
     var teacherID = localStorage.getItem("teacherID");
@@ -86,6 +97,29 @@ function Home(props) {
     setEditClassSemester(event.target.value);
     console.log(event.target.value);
   };
+
+  const removeClassByDate = async (uqID,date) => {
+    await fetch("http://10.80.125.251:5000/studentchecking/us-central1/checkapp/webApp/cancelSession", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        teacherID: teacherIDState,
+        uqID: uqID,
+        date: date,
+
+      }),
+    })
+    .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
 
   const fetchClassAPI = async () => {
     var teacherID = teacherIDState;
@@ -133,7 +167,6 @@ function Home(props) {
     .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        // setSessionsData(data);
       })
       .catch((error) => {
         console.error(error);
@@ -200,7 +233,13 @@ function Home(props) {
                         <button
                           type="button"
                           className="btn btn-success mx-1"
-                          onClick={() => props.history.push("/attendants")}
+                          onClick={() => {
+                            props.history.push({
+                              pathname: '/Attendants',
+                              state: { detailClass: t.uqID}
+                            })
+                            }
+                          }
                         >
                           Attendance
                         </button>
@@ -218,14 +257,18 @@ function Home(props) {
                           setEditClassEndTime(t.endTime);
                           setEditClassSemester(t.semester);
                           setEditClassUqId(t.uqID);
-                        }}
+                         }
+                        }
                       >
                         Edit
                       </button>
                       <button
                         type="button"
                         className="btn btn-danger mx-1"
-                        href="#"
+                        onClick={async () => {
+                          await removeClassByDate(t.uqID,t.currentDate);
+                          await fetchClassAPI()
+                        }}
                       >
                         Remove
                       </button>

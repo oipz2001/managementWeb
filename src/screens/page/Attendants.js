@@ -1,14 +1,49 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import * as HiIcons from "react-icons/hi";
 import { VictoryBar, VictoryChart, VictoryAxis, VictoryPie, VictoryStack, VictoryPortal, VictoryLabel } from "victory";
-import axios from "axios";
+const url = require("../components/urlConfig");
 
-function Attandents() {
+const moment = require("moment");
+
+function Attandents(props) {
   const [value, onChange] = useState(new Date());
   const [isShowModal, setShowModal] = useState(false);
   const [studentNameModal, setStudentNameModal] = useState("");
   const [studentIDModal, setStudentIDModal] = useState("");
+  const [teacherIDState, setTeacherIDState] = useState(null);
+
+  useEffect(() => {
+    var teacherID = localStorage.getItem("teacherID");
+    setTeacherIDState(teacherID);
+    console.log(props.location.state)
+  },[])
+
+  const fetchClassAttendance = async () => {
+    var teacherID = teacherIDState;
+    var date = moment(selectedDate).format("YYYY-MM-DD").toString();
+
+    await fetch(
+      url.endpointWebApp +
+        "/getSession?date=" +
+        date +
+        "&teacherID=" +
+        teacherID +
+        "&clientCurrentTime=" +
+        currentTime +
+        "&clientCurrentDate=" +
+        currentDate
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setSessionsData(data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
   const subject = [
     {
       id: "261457",
@@ -47,50 +82,13 @@ function Attandents() {
     },
   ];
 
-  const fetchAPI = async () => {
-    console.log("testAPI");
-    // fetch(
-    //   "http://localhost:5000/studentchecking/us-central1/checkapp/webApp/getData"
-    // )
-    //   .then((res) => res.json())
-    //   .then(
-    //     (result) => {
-    //       console.log(result);
-    //     },
-    //     (error) => {
-    //       console.log(error);
-    //     }
-    //   );
-
-
-    fetch('http://localhost:5000/studentchecking/us-central1/checkapp/webApp/postData', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: 'Pawaris',
-        id: '600610751'
-      })
-    })
-    .then((res) => res.json())
-    .then(
-        (result) => {
-          console.log(result);
-        },
-        (error) => {
-          console.log(error);
-        }
-      );
-  };
-
   const student = [
     { time: "14/08/2563", stutus: "checked" },
     { time: "13/08/2563", stutus: "checked" },
     { time: "12/08/2563", stutus: "checked" },
     { time: "11/08/2563", stutus: "Uncheck" },
   ];
+
 
   return (
     <div className="container-fluid pt-4">
@@ -227,7 +225,7 @@ function Attandents() {
                       aria-label="Status"
                     ></input>
                   </td>
-                  <div>
+                  <td>
                     <button
                       type="button"
                       className="btn btn-success mx-1"
@@ -235,7 +233,7 @@ function Attandents() {
                     >
                       Add
                     </button>
-                  </div>
+                  </td>
                 </tr>
                 {tbd.map((t, idx) => (
                   <tr key={idx}>
@@ -243,7 +241,7 @@ function Attandents() {
                     <td>{t.name}</td>
                     <td>{t.faculty}</td>
                     <td>{t.status}</td>
-                    <div>
+                    <td>
                       <button
                         type="button"
                         className="btn btn-info mx-1"
@@ -269,7 +267,7 @@ function Attandents() {
                       >
                         statistic
                       </button>
-                    </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

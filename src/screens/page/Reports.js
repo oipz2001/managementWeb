@@ -1,8 +1,21 @@
 import React from "react";
 import { useState } from "react";
+import ReactExport from "react-export-excel";
+import ReactDOM from "react-dom";
+import {
+  ExcelExport,
+  ExcelExportColumn,
+  ExcelExportColumnGroup
+} from '@progress/kendo-react-excel-export';
 
 function Reports() {
   const [value, onChange] = useState(new Date());
+  const data = [
+    { firstname: "jill", lastname: "smith", age: 22 },
+    { firstname: "david", lastname: "warner", age: 23 },
+    { firstname: "nick", lastname: "james", age: 26 },
+  ];
+  
 
   const head = [
     "SessionID",
@@ -80,26 +93,27 @@ function Reports() {
                         ></input>
                       </td>
                       <td className="col-1">
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="inputAddress"
-                            placeholder="30 min"
-                          ></input>
+                        <input
+                          type="text"
+                          className="form-control"
+                          id="inputAddress"
+                          placeholder="30 min"
+                        ></input>
                       </td>
                       <div>
+                      <ExcelExport
+                        data={data}
+                        fileName="Products.xlsx"
+                        ref={data}
+                      />
                         <button
                           type="button"
                           className="btn btn-success mx-1"
-                          href="#"
+                          onClick={this.export}
                         >
                           Export Excel
                         </button>
-                        <button
-                          type="button"
-                          className="btn btn-warning mx-1"
-                          href="#"
-                        >
+                        <button type="button" className="btn btn-warning mx-1">
                           Export CSV
                         </button>
                       </div>

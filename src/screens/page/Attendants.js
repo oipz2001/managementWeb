@@ -1,7 +1,15 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import * as HiIcons from "react-icons/hi";
-import { VictoryBar, VictoryChart, VictoryAxis, VictoryPie, VictoryStack, VictoryPortal, VictoryLabel } from "victory";
+import {
+  VictoryBar,
+  VictoryChart,
+  VictoryAxis,
+  VictoryPie,
+  VictoryStack,
+  VictoryPortal,
+  VictoryLabel,
+} from "victory";
 const url = require("../components/urlConfig");
 
 const moment = require("moment");
@@ -12,48 +20,76 @@ function Attandents(props) {
   const [studentNameModal, setStudentNameModal] = useState("");
   const [studentIDModal, setStudentIDModal] = useState("");
   const [teacherIDState, setTeacherIDState] = useState(null);
+  const [attClassState, setAttClassState] = useState({});
+  const [attClassStudent,setAttClassStudent] = useState([])
+  const [studentRemove, setStudentRemove] = useState();
+
 
   useEffect(() => {
     var teacherID = localStorage.getItem("teacherID");
     setTeacherIDState(teacherID);
-    console.log(props.location.state)
-  },[])
+  }, []);
 
-  const fetchClassAttendance = async () => {
-    var teacherID = teacherIDState;
-    var date = moment(selectedDate).format("YYYY-MM-DD").toString();
+  useEffect(() => {
+    const fetchAttendance = async () => {
+      await attClassAPI(
+        teacherIDState,
+        props.location.state.detailClass,
+        props.location.state.selectedDate
+      );
+    };
 
-    await fetch(
-      url.endpointWebApp +
-        "/getSession?date=" +
-        date +
-        "&teacherID=" +
-        teacherID +
-        "&clientCurrentTime=" +
-        currentTime +
-        "&clientCurrentDate=" +
-        currentDate
-    )
+    if(teacherIDState!=null)
+      fetchAttendance();
+
+  }, [teacherIDState]);
+
+  const attClassAPI = async (teacherID, uqID, date) => {
+    await fetch(url.endpointWebApp + "/attendance", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        attClassUqID: uqID,
+        attClassTeacherID: teacherID,
+        attClassCurrentDate: date,
+      }),
+    })
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        setSessionsData(data);
+        setAttClassState(data);
+        setAttClassStudent(data.statistics)
       })
       .catch((error) => {
         console.error(error);
       });
   };
 
-  const subject = [
-    {
-      id: "261457",
-      name: "Digital & image",
-      time: "18 Tue 18:00-19:30",
-      room: "512",
-      present: "16",
-      absent: "4",
-    },
-  ];
+  const removeStudentList = async (uqID,teacherID,studentID) => {
+    await fetch(url.endpointWebApp + "/removeStudentList", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        teacherID: teacherID,
+        uqID: uqID,
+        studentID: studentID,
+      }),
+    })
+    .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
   const data = [
     { dmy: "01/08/20", present: 20, absent: 0 },
     { dmy: "02/08/20", present: 15, absent: 5 },
@@ -65,64 +101,42 @@ function Attandents(props) {
     { dmy: "08/08/20", present: 16, absent: 4 },
   ];
 
-  const test11 = ["first", "second", "third"]
-  const head = ["Student ID", "Name", "Faculty", "Status"];
-  const tbd = [
-    {
-      id: "600610751",
-      name: "Pawaris Sueaaeim",
-      faculty: "Engineering",
-      status: "Checked",
-    },
-    {
-      id: "600610749",
-      name: "Parinya seetawan",
-      faculty: "Engineering",
-      status: "Uncheck",
-    },
-  ];
-
-  const student = [
-    { time: "14/08/2563", stutus: "checked" },
-    { time: "13/08/2563", stutus: "checked" },
-    { time: "12/08/2563", stutus: "checked" },
-    { time: "11/08/2563", stutus: "Uncheck" },
-  ];
-
+  const head = ["Student ID", "Name", "Time", "Status"];
 
   return (
     <div className="container-fluid pt-4">
+      {/* {
+      JSON.stringify( attClassStudent[0])
+      } */}
       <div className="box">
         <h3 className="head_text">Attendance & stat</h3>
         <div className="row mt-5">
           <div className="col-5">
             <div className="box_subject">
-              {subject.map((h, idx) => (
-                <tr key={idx}>
+                <tr >
                   <td>
                     <tr>
-                      <th className="p-1">{h.name}</th>
-                      <th className="p-1">{h.id}</th>
+                      <th className="p-1">{attClassState.name}</th>
+                      <th className="p-1">{attClassState.id}</th>
                     </tr>
-                    <tr>{h.time}</tr>
+                    <tr>{attClassState.startTime} - {attClassState.endTime}</tr>
                     <tr>
-                      room: {h.room}
+                      room: {attClassState.desc}
                       <th className="pl-5">
-                        {h.present}
+                        {attClassState.present}
                         <HiIcons.HiUser style={{ color: "green" }} />
-                        {h.absent}
+                        {attClassState.absent}
                         <HiIcons.HiUser style={{ color: "red" }} />
                       </th>
                     </tr>
                   </td>
                 </tr>
-              ))}
             </div>
             <div className="att_pei">
               <VictoryPie
                 data={[
-                  { x: "present", y: 16 },
-                  { x: "absent", y: 4 },
+                  { x: "present", y: attClassState.present },
+                  { x: "absent", y: attClassState.absent },
                 ]}
                 width={300}
                 colorScale={["green", "red"]}
@@ -136,29 +150,28 @@ function Attandents(props) {
                   colorScale={["green", "red"]}
                   style={{
                     data: { width: 20 },
-                    labels: { padding: -20 }
+                    labels: { padding: -20 },
                   }}
                   labelComponent={
                     <VictoryPortal>
-                      <VictoryLabel/>
+                      <VictoryLabel />
                     </VictoryPortal>
                   }
                 >
-                <VictoryBar
-                  data={data}
-                  x="dmy"
-                  y="present"
-                  labels={({ datum }) => (datum.present ? datum.present: '')}
-                  style={{ labels: { fill: "white" } }}
-                />
-                <VictoryBar
-                  data={data}
-                  x="dmy"
-                  y="absent"
-                  labels={({ datum }) => (datum.absent ? datum.absent: '')}
-                  style={{ labels: { fill: "white" } }}
-                />
-               
+                  <VictoryBar
+                    data={data}
+                    x="dmy"
+                    y="present"
+                    labels={({ datum }) => (datum.present ? datum.present : "")}
+                    style={{ labels: { fill: "white" } }}
+                  />
+                  <VictoryBar
+                    data={data}
+                    x="dmy"
+                    y="absent"
+                    labels={({ datum }) => (datum.absent ? datum.absent : "")}
+                    style={{ labels: { fill: "white" } }}
+                  />
                 </VictoryStack>
                 <VictoryAxis
                   label="Past 8 day"
@@ -211,17 +224,19 @@ function Attandents(props) {
                   </td>
                   <td className="col-2">
                     <input
+                      disabled  
                       type="text"
                       className="form-control"
-                      placeholder="Faculty"
-                      aria-label="Faculty"
+                      placeholder="don't know"
+                      aria-label="Time"
                     ></input>
                   </td>
                   <td className="col-1">
                     <input
+                      disabled
                       type="text"
                       className="form-control"
-                      placeholder="Status"
+                      placeholder="fales"
                       aria-label="Status"
                     ></input>
                   </td>
@@ -229,30 +244,29 @@ function Attandents(props) {
                     <button
                       type="button"
                       className="btn btn-success mx-1"
-                      href="#"
                     >
                       Add
                     </button>
                   </td>
                 </tr>
-                {tbd.map((t, idx) => (
+                {attClassStudent.map((t, idx) => (
                   <tr key={idx}>
-                    <td>{t.id}</td>
-                    <td>{t.name}</td>
-                    <td>{t.faculty}</td>
-                    <td>{t.status}</td>
+                    <td>{t.studentID}</td>
+                    <td>{t.studentName}</td>
+                    {t.timestamp == null ? <td>dont know</td> : <td>{t.timestamp}</td>}
+                    <td>{t.isChecked.toString()}</td>
                     <td>
                       <button
                         type="button"
-                        className="btn btn-info mx-1"
-                        href="#"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
                         className="btn btn-danger mx-1"
-                        href="#"
+                        onClick={async () => {
+                          await removeStudentList(attClassState.uqID,attClassState.teacherID,t.studentID);
+                          await attClassAPI(
+                            teacherIDState,
+                            props.location.state.detailClass,
+                            props.location.state.selectedDate
+                          );
+                        }}
                       >
                         Remove
                       </button>
@@ -261,8 +275,8 @@ function Attandents(props) {
                         data-toggle="modal"
                         data-target="#exampleModal"
                         onClick={(e) => {
-                          setStudentNameModal(t.name);
-                          setStudentIDModal(t.id);
+                          setStudentNameModal(t.studentName);
+                          setStudentIDModal(t.studentID);
                         }}
                       >
                         statistic
@@ -303,10 +317,10 @@ function Attandents(props) {
               </div>
               <tbody>
                 <h3 className="head_text pt-3">Checking list</h3>
-                {student.map((std, idx) => (
+                {attClassStudent.map((t, idx) => (
                   <tr key={idx}>
                     <tr>
-                      {std.stutus} {std.time}
+                      {t.isChecked.toString()} {t.timestamp}
                     </tr>
                   </tr>
                 ))}

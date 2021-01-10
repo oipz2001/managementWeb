@@ -40,12 +40,26 @@ class ExcelReader extends Component {
       const ws = wb.Sheets[wsname];
       /* Convert array of arrays */
       const data = XLSX.utils.sheet_to_json(ws);
+
+      var myData = []
+      for(var i=6;i<data.length;i++){
+        // console.log(data[i])
+        myData.push({
+          id:data[i]['__EMPTY'],
+          name:data[i]['__EMPTY_1'] + ' ' + data[i]['__EMPTY_2'],
+      })
+      }
+      console.log(myData)
+
       /* Update state */
-      this.setState({ data: data, cols: make_cols(ws["!ref"]) }, () => {
-        // console.log(JSON.stringify(this.state.data, null, 2));
-        // console.log('Test Set state')
+      // this.setState({ data: data, cols: make_cols(ws["!ref"]) }, () => {
+      //   // console.log(JSON.stringify(this.state.data, null, 2));
+      //   // console.log('Test Set state')
+      //   this._addStudentTestAPI(this.props.classData.uqID,this.props.classData.teacherID);
+      // });
+      this.setState({data:myData},() => {
         this._addStudentTestAPI(this.props.classData.uqID,this.props.classData.teacherID);
-      });
+      })
     };
 
     if (rABS) {

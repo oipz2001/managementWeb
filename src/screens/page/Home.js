@@ -70,9 +70,13 @@ function Home(props) {
     setTeacherIDState(teacherID);
     console.log(selectedDate);
     console.log(teacherIDState);
+
+    if(teacherIDState!=null)
     fetchClassAPI();
+
   }, [selectedDate, teacherIDState]);
 
+  
   const onChangeTextClassID = (event) => {
     setEditClassId(event.target.value);
     console.log(event.target.value);
@@ -99,7 +103,7 @@ function Home(props) {
   };
 
   const removeClassByDate = async (uqID,date) => {
-    await fetch("http://10.80.125.251:5000/studentchecking/us-central1/checkapp/webApp/cancelSession", {
+    await fetch(url.endpointWebApp + "/cancelSession", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -109,7 +113,6 @@ function Home(props) {
         teacherID: teacherIDState,
         uqID: uqID,
         date: date,
-
       }),
     })
     .then((response) => response.json())
@@ -119,7 +122,7 @@ function Home(props) {
       .catch((error) => {
         console.error(error);
       });
-  }
+  } 
 
   const fetchClassAPI = async () => {
     var teacherID = teacherIDState;
@@ -147,7 +150,7 @@ function Home(props) {
   };
 
   const editClassDetail = async () => {
-    await fetch("http://10.80.125.251:5000/studentchecking/us-central1/checkapp/webApp/editClassDetail", {
+    await fetch(url.endpointWebApp + "/editClassDetail", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -175,7 +178,7 @@ function Home(props) {
 
   return (
     <div className="container-fluid pt-4">
-      <p>{teacherIDState}</p>
+      {/* <p>{teacherIDState}</p> */}
       <div className="box">
         <div className="row">
           <h3 className="head_text">My Classroom</h3>
@@ -236,7 +239,10 @@ function Home(props) {
                           onClick={() => {
                             props.history.push({
                               pathname: '/Attendants',
-                              state: { detailClass: t.uqID}
+                              state: { 
+                                detailClass: t.uqID,
+                                selectedDate: t.currentDate
+                              }
                             })
                             }
                           }

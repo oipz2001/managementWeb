@@ -250,6 +250,24 @@ function Home(props) {
                           Attendance
                         </button>
                       )}
+                      {(t.sessionStatus === 0 || t.sessionStatus === 1) ? (
+                        <button
+                          type="button"
+                          className="btn btn-primary mx-1"
+                          onClick={() => {
+                            props.history.push({
+                              pathname: '/seatmap',
+                              state: { 
+                                detailClass: t.uqID,
+                                selectedDate: t.currentDate
+                              }
+                            })
+                            }
+                          }
+                        >
+                          Seatmap
+                        </button>
+                      ):(null)}
                       <button
                         type="button"
                         className="btn btn-info mx-1"

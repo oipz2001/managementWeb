@@ -5,18 +5,13 @@ import ReactDOM from "react-dom";
 import {
   ExcelExport,
   ExcelExportColumn,
-  ExcelExportColumnGroup
-} from '@progress/kendo-react-excel-export';
+  ExcelExportColumnGroup,
+} from "@progress/kendo-react-excel-export";
+import { aggregateBy, process } from "@progress/kendo-data-query";
+import ExportComponent from '../components/exportButton'
 
 function Reports() {
   const [value, onChange] = useState(new Date());
-  const data = [
-    { firstname: "jill", lastname: "smith", age: 22 },
-    { firstname: "david", lastname: "warner", age: 23 },
-    { firstname: "nick", lastname: "james", age: 26 },
-  ];
-  
-
   const head = [
     "SessionID",
     "Name",
@@ -53,9 +48,10 @@ function Reports() {
       desc: "516",
     },
   ];
-
   return (
     <div className="container-fluid pt-4 ">
+      <div style={{backgroundColor:'red'}}>
+      </div>
       <div className="box">
         <h3 className="head_text">Report</h3>
         <div className="box mt-5">
@@ -101,21 +97,7 @@ function Reports() {
                         ></input>
                       </td>
                       <div>
-                      <ExcelExport
-                        data={data}
-                        fileName="Products.xlsx"
-                        ref={data}
-                      />
-                        <button
-                          type="button"
-                          className="btn btn-success mx-1"
-                          onClick={this.export}
-                        >
-                          Export Excel
-                        </button>
-                        <button type="button" className="btn btn-warning mx-1">
-                          Export CSV
-                        </button>
+                        <ExportComponent/>
                       </div>
                     </tr>
                   ))}

@@ -26,6 +26,13 @@
   height: 85px;
 }
 
+.seat_mapBody {
+  background-color: #9E76B4;
+  width: 1500px;
+  height: 100vh;
+  border-radius: 15px;
+}
+
 .navbar-logo {
   pointer-events: none;
   display: flex;

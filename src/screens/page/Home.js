@@ -178,7 +178,6 @@ function Home(props) {
 
   return (
     <div className="container-fluid pt-4">
-      {/* <p>{teacherIDState}</p> */}
       <div className="box">
         <div className="row">
           <h3 className="head_text">My Classroom</h3>

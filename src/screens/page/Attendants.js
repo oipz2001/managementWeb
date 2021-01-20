@@ -21,9 +21,11 @@ function Attandents(props) {
   const [studentIDModal, setStudentIDModal] = useState("");
   const [teacherIDState, setTeacherIDState] = useState(null);
   const [attClassState, setAttClassState] = useState({});
-  const [attClassStudent,setAttClassStudent] = useState([])
+  const [attClassStudent, setAttClassStudent] = useState([]);
   const [studentRemove, setStudentRemove] = useState();
-
+  const [addStudentName, setAddStudentName] = useState(null);
+  const [addStudentID, setAddStudentID] = useState(null);
+  const [checkList, setCheckList] = useState([]);
 
   useEffect(() => {
     var teacherID = localStorage.getItem("teacherID");
@@ -39,10 +41,17 @@ function Attandents(props) {
       );
     };
 
-    if(teacherIDState!=null)
-      fetchAttendance();
-
+    if (teacherIDState != null) fetchAttendance();
   }, [teacherIDState]);
+
+  const onChangeTextStudentID = (event) => {
+    setAddStudentID(event.target.value);
+    console.log(event.target.value);
+  };
+  const onChangeTextStudentName = (event) => {
+    setAddStudentName(event.target.value);
+    console.log(event.target.value);
+  };
 
   const attClassAPI = async (teacherID, uqID, date) => {
     await fetch(url.endpointWebApp + "/attendance", {
@@ -61,14 +70,14 @@ function Attandents(props) {
       .then((data) => {
         console.log(data);
         setAttClassState(data);
-        setAttClassStudent(data.statistics)
+        setAttClassStudent(data.statistics);
       })
       .catch((error) => {
         console.error(error);
       });
   };
 
-  const removeStudentList = async (uqID,teacherID,studentID) => {
+  const removeStudentList = async (uqID, teacherID, studentID) => {
     await fetch(url.endpointWebApp + "/removeStudentList", {
       method: "POST",
       headers: {
@@ -81,14 +90,106 @@ function Attandents(props) {
         studentID: studentID,
       }),
     })
-    .then((response) => response.json())
+      .then((response) => response.json())
       .then((data) => {
         console.log(data);
       })
       .catch((error) => {
         console.error(error);
       });
-  }
+  };
+
+  const studentStat = async (uqID, studentID, teacherID) => {
+    await fetch(url.endpointWebApp + "/studentReport", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        teacherID: teacherID,
+        uqID: uqID,
+        studentID: studentID,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setCheckList(data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const checkStudent = async (uqID, date, studentID, teacherID) => {
+    await fetch(url.endpointWebApp + "/checkStudent", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        teacherID: teacherID,
+        uqID: uqID,
+        studentID: studentID,
+        date: date,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const addStudent = async (uqID, studentID, studentName, teacherID) => {
+    await fetch(url.endpointWebApp + "/addStudent", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        teacherID: teacherID,
+        uqID: uqID,
+        studentID: studentID,
+        studentName: studentName,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const uncheckStudent = async (uqID, date, studentID, teacherID) => {
+    await fetch(url.endpointWebApp + "/checkStudent", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        teacherID: teacherID,
+        uqID: uqID,
+        studentID: studentID,
+        date: date,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
 
   const data = [
     { dmy: "01/08/20", present: 20, absent: 0 },
@@ -105,32 +206,31 @@ function Attandents(props) {
 
   return (
     <div className="container-fluid pt-4">
-      {/* {
-      JSON.stringify( attClassStudent[0])
-      } */}
       <div className="box">
         <h3 className="head_text">Attendance & stat</h3>
         <div className="row mt-5">
           <div className="col-5">
             <div className="box_subject">
-                <tr >
-                  <td>
-                    <tr>
-                      <th className="p-1">{attClassState.name}</th>
-                      <th className="p-1">{attClassState.id}</th>
-                    </tr>
-                    <tr>{attClassState.startTime} - {attClassState.endTime}</tr>
-                    <tr>
-                      room: {attClassState.desc}
-                      <th className="pl-5">
-                        {attClassState.present}
-                        <HiIcons.HiUser style={{ color: "green" }} />
-                        {attClassState.absent}
-                        <HiIcons.HiUser style={{ color: "red" }} />
-                      </th>
-                    </tr>
-                  </td>
-                </tr>
+              <tr>
+                <td>
+                  <tr>
+                    <th className="p-1">{attClassState.name}</th>
+                    <th className="p-1">{attClassState.id}</th>
+                  </tr>
+                  <tr>
+                    {attClassState.startTime} - {attClassState.endTime}
+                  </tr>
+                  <tr>
+                    room: {attClassState.desc}
+                    <th className="pl-5">
+                      {attClassState.present}
+                      <HiIcons.HiUser style={{ color: "green" }} />
+                      {attClassState.absent}
+                      <HiIcons.HiUser style={{ color: "red" }} />
+                    </th>
+                  </tr>
+                </td>
+              </tr>
             </div>
             <div className="att_pei">
               <VictoryPie
@@ -212,6 +312,7 @@ function Attandents(props) {
                       className="form-control"
                       placeholder="Student ID"
                       aria-label="Student ID"
+                      onChange={(evt) => onChangeTextStudentID(evt)}
                     ></input>
                   </td>
                   <td>
@@ -220,30 +321,28 @@ function Attandents(props) {
                       className="form-control"
                       placeholder="Name"
                       aria-label="Name"
+                      onChange={(evt) => onChangeTextStudentName(evt)}
                     ></input>
                   </td>
-                  <td className="col-2">
-                    <input
-                      disabled  
-                      type="text"
-                      className="form-control"
-                      placeholder="don't know"
-                      aria-label="Time"
-                    ></input>
-                  </td>
-                  <td className="col-1">
-                    <input
-                      disabled
-                      type="text"
-                      className="form-control"
-                      placeholder="fales"
-                      aria-label="Status"
-                    ></input>
-                  </td>
+                  <td className="col-2"></td>
+                  <td className="col-1"></td>
                   <td>
                     <button
                       type="button"
                       className="btn btn-success mx-1"
+                      onClick={async (e) => {
+                        await addStudent(
+                          attClassState.uqID,
+                          addStudentName,
+                          addStudentID,
+                          teacherIDState
+                        );
+                        await attClassAPI(
+                          teacherIDState,
+                          props.location.state.detailClass,
+                          props.location.state.selectedDate
+                        );
+                      }}
                     >
                       Add
                     </button>
@@ -251,16 +350,68 @@ function Attandents(props) {
                 </tr>
                 {attClassStudent.map((t, idx) => (
                   <tr key={idx}>
-                    <td>{t.studentID}</td>
+                    <td>{t.studentUqID}</td>
                     <td>{t.studentName}</td>
-                    {t.timestamp == null ? <td>dont know</td> : <td>{t.timestamp}</td>}
-                    <td>{t.isChecked.toString()}</td>
+                    {t.timestamp == null ? (
+                      <td>Unknow</td>
+                    ) : (
+                      <td>{t.timestamp}</td>
+                    )}
+                    {t.isChecked ? (
+                      <td>
+                        <button
+                          className="btn btn-success mx-1"
+                          onClick={async (e) => {
+                            await checkStudent(
+                              attClassState.uqID,
+                              attClassState.currentDate,
+                              t.studentID,
+                              teacherIDState
+                            );
+                            await attClassAPI(
+                              teacherIDState,
+                              props.location.state.detailClass,
+                              props.location.state.selectedDate
+                            );
+                          }}
+                        >
+                          Uncheck
+                        </button>
+                        <HiIcons.HiUser style={{ color: "green" }} />
+                      </td>
+                    ) : (
+                      <td>
+                        <button
+                          className="btn btn-warning mx-1"
+                          onClick={async (e) => {
+                            await uncheckStudent(
+                              attClassState.uqID,
+                              attClassState.currentDate,
+                              t.studentID,
+                              teacherIDState
+                            );
+                            await attClassAPI(
+                              teacherIDState,
+                              props.location.state.detailClass,
+                              props.location.state.selectedDate
+                            );
+                          }}
+                        >
+                          Check
+                        </button>
+                        <HiIcons.HiUser style={{ color: "red" }} />
+                      </td>
+                    )}
                     <td>
                       <button
                         type="button"
                         className="btn btn-danger mx-1"
                         onClick={async () => {
-                          await removeStudentList(attClassState.uqID,attClassState.teacherID,t.studentID);
+                          await removeStudentList(
+                            attClassState.uqID,
+                            attClassState.teacherID,
+                            t.studentID
+                          );
                           await attClassAPI(
                             teacherIDState,
                             props.location.state.detailClass,
@@ -271,12 +422,17 @@ function Attandents(props) {
                         Remove
                       </button>
                       <button
-                        className="btn btn-warning mx-1"
+                        className="btn btn-primary mx-1"
                         data-toggle="modal"
                         data-target="#exampleModal"
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           setStudentNameModal(t.studentName);
-                          setStudentIDModal(t.studentID);
+                          setStudentIDModal(t.studentUqID);
+                          await studentStat(
+                            attClassState.uqID,
+                            t.studentID,
+                            teacherIDState
+                          );
                         }}
                       >
                         statistic
@@ -317,11 +473,14 @@ function Attandents(props) {
               </div>
               <tbody>
                 <h3 className="head_text pt-3">Checking list</h3>
-                {attClassStudent.map((t, idx) => (
+                {checkList.map((t, idx) => (
                   <tr key={idx}>
-                    <tr>
-                      {t.isChecked.toString()} {t.timestamp}
-                    </tr>
+                    {t.date} is check{" "}
+                    {t.classStatus == -1
+                      ? "Waiting"
+                      : t.isChecked
+                      ? t.timestamp
+                      : t.isChecked.toString()}
                   </tr>
                 ))}
               </tbody>

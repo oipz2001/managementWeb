@@ -9,6 +9,7 @@ function Seatmap(props) {
   const [value, onChange] = useState(new Date());
   const [teacherIDState, setTeacherIDState] = useState(null);
   const [seatmapClassState, setSeatmapClassState] = useState({});
+  const [seatMaps, setSeapMaps] = useState([]);
 
   useEffect(() => {
     var teacherID = localStorage.getItem("teacherID");
@@ -24,9 +25,7 @@ function Seatmap(props) {
       );
     };
 
-    if(teacherIDState!=null)
-      fetchSeatmap();
-
+    if (teacherIDState != null) fetchSeatmap();
   }, [teacherIDState]);
 
   const subject = [
@@ -39,52 +38,73 @@ function Seatmap(props) {
       absent: "4",
     },
   ];
-  const elements = [
-    {
-      id: "600610749",
-      // type: "input", // input node
-      data: { label: <div>Parinya Seetawan</div> },
-      position: { x: 250, y: 25 },
-    },
-    // default node
-    {
-      id: "600610750",
-      // you can also pass a React component as a label
-      data: { label: <div>Parinyakorn Something</div> },
-      position: { x: 100, y: 125 },
-    },
-    {
-      id: "600610751",
-      // type: "output", // output node
-      data: { label: <div>Pawaris Something</div> },
-      position: { x: 250, y: 250 },
-    },
-    // animated edge
-    // { id: "e1-2", source: "1", target: "2", animated: true },
-    // { id: "e2-3", source: "2", target: "3" },
-  ];
 
   const seatmapClassAPI = async (teacherID, uqID, date) => {
-    await fetch(url.endpointWebApp + "/seatmap", {
+    await fetch(url.endpointWebApp + "/getSeatmap", {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        seatmepClassUqID: uqID,
-        seatmapClassTeacherID: teacherID,
-        seatmapClassSelectedDate: date,
+        uqID: uqID,
+        teacherID: teacherID,
+        date: date,
       }),
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
-        setSeatmapClassState(data);
+        let mySeatmaps = get2DArrayGraphs(data);
+        console.log(mySeatmaps);
+        console.log(data)
+        setSeapMaps(mySeatmaps);
+        // setSeatmapClassState();
       })
       .catch((error) => {
         console.error(error);
       });
+  };
+
+  const get2DArrayGraphs = (graphs) => {
+    var myGraphs = [];
+    for (let i = 0; i < graphs.length; i++) {
+      var seatmapEachArr = graphs[i][`arr${i}`];
+      var delX = 0;
+      var delY = 0;
+      seatmapEachArr.forEach((coodinate) => {
+        let absX = Math.abs(coodinate.x);
+        let absY = Math.abs(coodinate.y);
+        if (absX > delX) {
+          delX = absX;
+        }
+        if (absY > delY) {
+          delY = absY;
+        }
+      });
+      var arr = [];
+      let rowSize = delY * 2 + 1;
+      let columnSize = delX * 2 + 1;
+      var num = delY;
+      for (let i = 0; i < rowSize; i++) {
+        let myArr = [];
+        for (let j = 0; j < columnSize; j++) {
+          let coo_X = j - delX;
+          let coo_Y = i + num;
+          let matchObj = seatmapEachArr.find(
+            (x) => x.x == coo_X && x.y == coo_Y
+          );
+          if (matchObj != undefined) {
+            myArr.push(matchObj.node);
+          } else {
+            myArr.push(" ");
+          }
+        }
+        num -= 2;
+        arr.push(myArr);
+      }
+      myGraphs.push({ [`graph${i}`]: arr, sumMax: delX + delY });
+    }
+    return myGraphs;
   };
 
   return (
@@ -116,11 +136,35 @@ function Seatmap(props) {
               </td>
             </tr>
           </div>
-          <div className="box">
-            <div className="seat_mapBody">
-              <ReactFlow elements={elements} />
+          {seatMaps.map((seatmap, i) => (
+            <div className="box" key={i}>
+              {seatmap[`graph${i}`].map((row, j) => (
+                <tr className="box_seatMap">
+                  {row.map((col, k) => (
+                    <td key={k}>
+                      {col != " " ? (
+                        <div>
+                          <button
+                            type="button"
+                            className="btn btn-success m-1"
+                          >
+                            {col}
+                          </button>
+                        </div>
+                      ) : (
+                        <div>
+                          <button
+                            type="button"
+                            className="btn btn-primary m-1"
+                          ></button>
+                        </div>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>

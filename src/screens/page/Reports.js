@@ -1,12 +1,12 @@
 import React from "react";
-import { useState , useEffect} from "react";
-import ExportComponent from '../components/exportButtonNew'
+import { useState, useEffect } from "react";
+import ExportComponent from "../components/exportButtonNew";
 const url = require("../components/urlConfig");
 
 function Reports() {
   const [value, onChange] = useState(new Date());
-  const [reportClass, setReportClass] = useState({});
-  const [semester, setSemester] = useState('');
+  const [reportClass, setReportClass] = useState([]);
+  const [semester, setSemester] = useState("");
   const [teacherIDState, setTeacherIDState] = useState(null);
 
   useEffect(() => {
@@ -15,46 +15,18 @@ function Reports() {
   }, []);
 
   useEffect(() => {
-    reportClassAPI(teacherIDState)
-  },[teacherIDState,semester])
-
+    reportClassAPI(teacherIDState);
+  }, [teacherIDState, semester]);
 
   const head = [
     "SessionID",
     "Name",
-    "Start time - End time",
+    "Start time",
     "Room",
     "Late",
     "Absent",
     "Report file",
   ];
-
-  // const tbd1 = [
-  //   {
-  //     id: "261457",
-  //     name: "Digital & image",
-  //     time: "18 Tue 18:00-19:30",
-  //     desc: "412",
-  //   },
-  //   {
-  //     id: "261457",
-  //     name: "Computer Vision",
-  //     time: "18 Tue 16:00-17:30",
-  //     desc: "402",
-  //   },
-  //   {
-  //     id: "261457",
-  //     name: "Calculus 1",
-  //     time: "18 Tue 11:00-12:30",
-  //     desc: "412",
-  //   },
-  //   {
-  //     id: "261457",
-  //     name: "Calculus 2",
-  //     time: "18 Tue 8:00-9:30",
-  //     desc: "516",
-  //   },
-  // ];
 
   const reportClassAPI = async (teacherID) => {
     await fetch(url.endpointWebApp + "/getClassReport", {
@@ -79,15 +51,12 @@ function Reports() {
   };
 
   const handleChange = (event) => {
-    setSemester(event.target.value)
-  }
-
-
+    setSemester(event.target.value);
+  };
 
   return (
     <div className="container-fluid pt-4 ">
-      <div style={{backgroundColor:'red'}}>
-      </div>
+      <div style={{ backgroundColor: "red" }}></div>
       <div className="box">
         <h3 className="head_text">Report</h3>
         <div className="box mt-5">
@@ -95,12 +64,13 @@ function Reports() {
             <select
               className="form-select form-select-lg mb-3"
               aria-label="Default select example"
-              onChange={(e) => 
-                handleChange(e)
+              onChange={
+                (e) => handleChange(e)
+                // reportClassAPI(e)
               }
             >
-              <option selected >Please select semester</option>
-              <option value="2/2563" >2/2563</option>
+              <option selected>Please select semester</option>
+              <option value="2/2563">2/2563</option>
               <option value="1/2563">1/2563</option>
               <option value="2/2562">2/2562</option>
             </select>
@@ -114,11 +84,12 @@ function Reports() {
                   ))}
                 </thead>
                 <tbody>
-                    <tr>
-                      <td>{reportClass.id}</td>
-                      <td>{reportClass.name}</td>
-                      <td>{reportClass.startTime}{reportClass.endTime}</td>
-                      <td>{reportClass.desc}</td>
+                  {reportClass.map((t, idex) => (
+                    <tr key={idex}>
+                      <td>{t.classID}</td>
+                      <td>{t.className}</td>
+                      <td>{t.classStartTime}</td>
+                      <td>{t.classDesc}</td>
                       <td className="col-1">
                         <input
                           type="text"
@@ -136,9 +107,10 @@ function Reports() {
                         ></input>
                       </td>
                       <div>
-                        <ExportComponent/>
+                        <ExportComponent />
                       </div>
                     </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

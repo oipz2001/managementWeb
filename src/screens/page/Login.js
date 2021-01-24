@@ -6,8 +6,9 @@ function Login() {
 
 
   useEffect(() => {
-    localStorage.setItem('teacherID','6006107499')
+    localStorage.setItem('teacherID','PARINYA SEETAWAN')
   },[])
+
 
   const SignIn = () => {
     firebase.auth().signInWithPopup(provider)
@@ -21,17 +22,10 @@ function Login() {
       mail:result.additionalUserInfo.profile.mail,
       jobTitle:result.additionalUserInfo.profile.jobTitle
     })
-    // User is signed in.
-    // IdP data available in result.additionalUserInfo.profile.
-    // OAuth access token can also be retrieved:
-    // result.credential.accessToken
-    // OAuth ID token can also be retrieved:
-    // result.credential.idToken
   })
   .catch(function(error) {
-    // Handle error.
   });
-
+  
   }
   const SignOut = async () => {
     await firebase.auth().signOut().then(function() {

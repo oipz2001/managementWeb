@@ -25,8 +25,6 @@ const myDate = [
   "2020-12-15",
 ];
 
-// const [reportClassState, setReportClassState] = useState({});
-
 class App extends React.Component {
   _exporter;
   export = () => {

@@ -26,6 +26,7 @@ function Attandents(props) {
   const [addStudentName, setAddStudentName] = useState(null);
   const [addStudentID, setAddStudentID] = useState(null);
   const [checkList, setCheckList] = useState([]);
+  const [studentStatChart,setStudentStatChart] = useState({})
 
   useEffect(() => {
     var teacherID = localStorage.getItem("teacherID");
@@ -115,7 +116,8 @@ function Attandents(props) {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        setCheckList(data);
+        setCheckList(data.myData);
+        setStudentStatChart(data.studentStat)
       })
       .catch((error) => {
         console.error(error);
@@ -123,6 +125,7 @@ function Attandents(props) {
   };
 
   const checkStudent = async (uqID, date, studentID, teacherID) => {
+    console.log(studentID)
     await fetch(url.endpointWebApp + "/checkStudent", {
       method: "POST",
       headers: {
@@ -169,7 +172,8 @@ function Attandents(props) {
   };
 
   const uncheckStudent = async (uqID, date, studentID, teacherID) => {
-    await fetch(url.endpointWebApp + "/checkStudent", {
+    console.log(studentID)
+    await fetch(url.endpointWebApp + "/uncheckStudent", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -191,18 +195,20 @@ function Attandents(props) {
       });
   };
 
-  const data = [
-    { dmy: "01/08/20", present: 20, absent: 0 },
-    { dmy: "02/08/20", present: 15, absent: 5 },
-    { dmy: "03/08/20", present: 18, absent: 2 },
-    { dmy: "04/08/20", present: 16, absent: 4 },
-    { dmy: "05/08/20", present: 20, absent: 0 },
-    { dmy: "06/08/20", present: 15, absent: 5 },
-    { dmy: "07/08/20", present: 18, absent: 2 },
-    { dmy: "08/08/20", present: 16, absent: 4 },
-  ];
-
   const head = ["Student ID", "Name", "Time", "Status"];
+
+  // constructor() {
+  //   super();
+  //   this.state = {};
+  // }
+
+  // handleZoom(domain) {
+  //   this.setState({selectedDomain: domain});
+  // }
+
+  // handleBrush(domain) {
+  //   this.setState({zoomDomain: domain});
+  // }
 
   return (
     <div className="container-fluid pt-4">
@@ -259,22 +265,22 @@ function Attandents(props) {
                   }
                 >
                   <VictoryBar
-                    data={data}
-                    x="dmy"
+                    data={attClassState.statEachDate}
+                    x="date"
                     y="present"
                     labels={({ datum }) => (datum.present ? datum.present : "")}
                     style={{ labels: { fill: "white" } }}
                   />
                   <VictoryBar
-                    data={data}
-                    x="dmy"
+                    data={attClassState.statEachDate}
+                    x="date"
                     y="absent"
                     labels={({ datum }) => (datum.absent ? datum.absent : "")}
                     style={{ labels: { fill: "white" } }}
                   />
                 </VictoryStack>
                 <VictoryAxis
-                  label="Past 8 day"
+                  label="Year-Month-Day"
                   style={{
                     axisLabel: { padding: 30 },
                     tickLabels: { fontSize: 8, padding: 5 },
@@ -325,7 +331,7 @@ function Attandents(props) {
                     ></input>
                   </td>
                   <td className="col-2"></td>
-                  <td className="col-1"></td>
+                  <td className="col-2"></td>
                   <td>
                     <button
                       type="button"
@@ -362,7 +368,7 @@ function Attandents(props) {
                         <button
                           className="btn btn-success mx-1"
                           onClick={async (e) => {
-                            await checkStudent(
+                            await uncheckStudent(
                               attClassState.uqID,
                               attClassState.currentDate,
                               t.studentID,
@@ -384,7 +390,7 @@ function Attandents(props) {
                         <button
                           className="btn btn-warning mx-1"
                           onClick={async (e) => {
-                            await uncheckStudent(
+                            await checkStudent(
                               attClassState.uqID,
                               attClassState.currentDate,
                               t.studentID,
@@ -463,8 +469,8 @@ function Attandents(props) {
               <div className="att_pei">
                 <VictoryPie
                   data={[
-                    { x: "present", y: 3 },
-                    { x: "absent", y: 1 },
+                    { x: "present", y: studentStatChart.present },
+                    { x: "absent", y:studentStatChart.absent },
                   ]}
                   width={300}
                   colorScale={["green", "red"]}
